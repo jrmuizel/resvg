@@ -17,6 +17,7 @@ pub fn fill(
     opt: &Options,
     bbox: Rect,
     dt: &mut raqote::DrawTarget,
+    draw_options: &raqote::DrawOptions,
 ) {
     if let Some(ref fill) = fill {
         let patt_dt;
@@ -55,7 +56,7 @@ pub fn fill(
         dt.fill(
             path,
             &source,
-            &raqote::DrawOptions::default(),
+            draw_options,
         );
     }
 }
@@ -67,6 +68,7 @@ pub fn stroke(
     opt: &Options,
     bbox: Rect,
     dt: &mut raqote::DrawTarget,
+    draw_options: &raqote::DrawOptions,
 ) {
     if let Some(ref stroke) = stroke {
         let cap = match stroke.linecap {
@@ -132,7 +134,7 @@ pub fn stroke(
             &path,
             &source,
             &style,
-            &raqote::DrawOptions::default(),
+            draw_options,
         );
     }
 }

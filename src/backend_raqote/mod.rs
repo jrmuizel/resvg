@@ -16,6 +16,7 @@ use crate::backend_utils::ConvTransform;
 
 mod path;
 mod style;
+mod clip_and_mask;
 
 mod prelude {
     pub use super::super::prelude::*;
@@ -238,7 +239,7 @@ fn render_node(
             Some(render_group(node, opt, layers, dt))
         }
         usvg::NodeKind::Path(ref path) => {
-            path::draw(&node.tree(), path, opt, dt)
+            path::draw(&node.tree(), path, opt, dt, &raqote::DrawOptions::default())
         }
         usvg::NodeKind::Image(ref img) => {
 //            Some(image::draw(img, opt, cr))
@@ -303,27 +304,25 @@ fn render_group_impl(
 //        }
 //    }
 
-//    if let Some(ref id) = g.clip_path {
-//        if let Some(clip_node) = node.tree().defs_by_id(id) {
-//            if let usvg::NodeKind::ClipPath(ref cp) = *clip_node.borrow() {
-//                let sub_cr = cairo::Context::new(&*sub_surface);
-//                sub_cr.set_matrix(curr_ts);
-//
-//                clippath::apply(&clip_node, cp, opt, bbox, layers, &sub_cr);
-//            }
-//        }
-//    }
+    if let Some(ref id) = g.clip_path {
+        if let Some(clip_node) = node.tree().defs_by_id(id) {
+            if let usvg::NodeKind::ClipPath(ref cp) = *clip_node.borrow() {
+                sub_dt.set_transform(&curr_ts);
 
-//    if let Some(ref id) = g.mask {
-//        if let Some(mask_node) = node.tree().defs_by_id(id) {
-//            if let usvg::NodeKind::Mask(ref mask) = *mask_node.borrow() {
-//                let sub_cr = cairo::Context::new(&*sub_surface);
-//                sub_cr.set_matrix(curr_ts);
-//
-//                mask::apply(&mask_node, mask, opt, bbox, layers, &sub_cr);
-//            }
-//        }
-//    }
+                clip_and_mask::clip(&clip_node, cp, opt, bbox, layers, &mut sub_dt);
+            }
+        }
+    }
+
+    if let Some(ref id) = g.mask {
+        if let Some(mask_node) = node.tree().defs_by_id(id) {
+            if let usvg::NodeKind::Mask(ref mask) = *mask_node.borrow() {
+                sub_dt.set_transform(&curr_ts);
+
+                clip_and_mask::mask(&mask_node, mask, opt, bbox, layers, &mut sub_dt);
+            }
+        }
+    }
 
     dt.set_transform(&raqote::Transform::default());
 

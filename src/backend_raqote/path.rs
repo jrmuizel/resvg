@@ -15,6 +15,8 @@ pub fn draw(
     path: &usvg::Path,
     opt: &Options,
     dt: &mut raqote::DrawTarget,
+    draw_options: &raqote::DrawOptions,
+
 ) -> Option<Rect> {
     let mut pb = raqote::PathBuilder::new();
     for seg in &path.segments {
@@ -57,8 +59,8 @@ pub fn draw(
         }
     }
 
-    style::fill(tree, &segments, &path.fill, opt, style_bbox, dt);
-    style::stroke(tree, &segments, &path.stroke, opt, style_bbox, dt);
+    style::fill(tree, &segments, &path.fill, opt, style_bbox, dt, draw_options);
+    style::stroke(tree, &segments, &path.stroke, opt, style_bbox, dt, draw_options);
 
 //    // Revert anti-aliasing.
 //    cr.set_antialias(cairo::Antialias::Default);
