@@ -180,20 +180,35 @@ fn prepare_radial<'a>(
         g.transform
     };
 
-    let mut grad = raqote::Source::new_two_circle_radial_gradient(
-        raqote::Gradient { stops: conv_stops(g, opacity) },
-        raqote::Point::new(g.fx as f32, g.fy as f32),
-        0.0,
-        raqote::Point::new(g.cx as f32, g.cy as f32),
-        g.r.value() as f32,
-        conv_spread(g.base.spread_method),
-    );
+    let mut grad;
 
-    if let raqote::Source::TwoCircleRadialGradient(_, _, _, _, _, _, ref mut transform) = grad {
-        let ts: raqote::Transform = ts.to_native();
-        if let Some(ts) = ts.inverse() {
-            *transform = transform.pre_mul(&ts);
+    if g.fx == g.cx && g.fy == g.fy {
+        grad = raqote::Source::new_radial_gradient(
+            raqote::Gradient { stops: conv_stops(g, opacity) },
+            raqote::Point::new(g.cx as f32, g.cy as f32),
+            g.r.value() as f32,
+            conv_spread(g.base.spread_method),
+        );
+    } else {
+        grad = raqote::Source::new_two_circle_radial_gradient(
+            raqote::Gradient { stops: conv_stops(g, opacity) },
+            raqote::Point::new(g.fx as f32, g.fy as f32),
+            0.0,
+            raqote::Point::new(g.cx as f32, g.cy as f32),
+            g.r.value() as f32,
+            conv_spread(g.base.spread_method),
+        );
+    }
+
+    match grad {
+        raqote::Source::RadialGradient(_, _, ref mut transform)
+        | raqote::Source::TwoCircleRadialGradient(_, _, _, _, _, _, ref mut transform) => {
+            let ts: raqote::Transform = ts.to_native();
+            if let Some(ts) = ts.inverse() {
+                *transform = transform.pre_mul(&ts);
+            }
         }
+        _ => {}
     }
 
     grad
