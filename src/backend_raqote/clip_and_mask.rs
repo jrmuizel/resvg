@@ -42,12 +42,14 @@ pub fn clip(
     clip_dt.set_transform(&dt.get_transform().pre_mul(&cp.transform.to_native()));
 
     if cp.units == usvg::Units::ObjectBoundingBox {
-        clip_dt.set_transform(&usvg::Transform::from_bbox(bbox).to_native());
+        let ctm = clip_dt.get_transform().pre_mul(&usvg::Transform::from_bbox(bbox).to_native());
+        clip_dt.set_transform(&ctm);
     }
 
     let matrix = *clip_dt.get_transform();
     for node in node.children() {
-        clip_dt.set_transform(&node.transform().to_native());
+        let ctm = clip_dt.get_transform().pre_mul(&node.transform().to_native());
+        clip_dt.set_transform(&ctm);
 
         match *node.borrow() {
             usvg::NodeKind::Path(ref p) => {
@@ -198,6 +200,8 @@ pub fn mask(
             }
         }
     }
+
+    sub_dt.set_transform(&raqote::Transform::identity());
 
     let mask_img = raqote::Image {
         width: mask_dt.width() as i32,
