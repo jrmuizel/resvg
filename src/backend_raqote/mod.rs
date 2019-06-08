@@ -15,6 +15,7 @@ use crate::backend_utils::ConvTransform;
 
 
 mod path;
+mod filter;
 mod style;
 mod clip_and_mask;
 
@@ -295,14 +296,14 @@ fn render_group_impl(
         render_group(node, opt, layers, &mut sub_dt)
     };
 
-//    if let Some(ref id) = g.filter {
-//        if let Some(filter_node) = node.tree().defs_by_id(id) {
-//            if let usvg::NodeKind::Filter(ref filter) = *filter_node.borrow() {
-//                let ts = usvg::Transform::from_native(&curr_ts);
-//                filter::apply(filter, bbox, &ts, opt, &mut *sub_surface);
-//            }
-//        }
-//    }
+    if let Some(ref id) = g.filter {
+        if let Some(filter_node) = node.tree().defs_by_id(id) {
+            if let usvg::NodeKind::Filter(ref filter) = *filter_node.borrow() {
+                let ts = usvg::Transform::from_native(&curr_ts);
+                filter::apply(filter, bbox, &ts, opt, &mut sub_dt);
+            }
+        }
+    }
 
     if let Some(ref id) = g.clip_path {
         if let Some(clip_node) = node.tree().defs_by_id(id) {
