@@ -471,13 +471,12 @@ impl Filter<raqote::DrawTarget> for RaqoteFilter {
                     rect: subregion.translate_to(0, 0).to_rect(),
                     aspect: fe.aspect,
                 };
-/*
+
                 if format == usvg::ImageFormat::SVG {
-                    super::image::draw_svg(data, view_box, opt, &cr);
+                    super::image::draw_svg(data, view_box, opt, &mut dt);
                 } else {
-                    super::image::draw_raster(data, view_box, fe.rendering_mode, opt, &cr);
+                    super::image::draw_raster(data, view_box, fe.rendering_mode, opt, &mut dt);
                 }
-                */
             }
             usvg::FeImageKind::Use(..) => {}
         }

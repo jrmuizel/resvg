@@ -18,6 +18,7 @@ mod path;
 mod filter;
 mod style;
 mod clip_and_mask;
+mod image;
 
 mod prelude {
     pub use super::super::prelude::*;
@@ -243,8 +244,7 @@ fn render_node(
             path::draw(&node.tree(), path, opt, dt, &raqote::DrawOptions::default())
         }
         usvg::NodeKind::Image(ref img) => {
-//            Some(image::draw(img, opt, cr))
-            None
+            Some(image::draw(img, opt, dt))
         }
         usvg::NodeKind::Group(ref g) => {
             render_group_impl(node, g, opt, layers, dt)
