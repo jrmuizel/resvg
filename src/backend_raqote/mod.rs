@@ -75,9 +75,9 @@ impl ColorExt for usvg::Color {
     }
 
     fn to_u32(&self, a: u8) -> u32 {
-        let r = premultiply(self.red, a) as u32;
-        let g = premultiply(self.green, a) as u32;
-        let b = premultiply(self.blue, a) as u32;
+        let r = self.red as u32;
+        let g = self.green as u32;
+        let b = self.blue as u32;
 
         ((a as u32 & 0xff) << 24) | ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff)
     }
