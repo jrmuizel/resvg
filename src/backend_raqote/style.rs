@@ -8,6 +8,7 @@ use usvg::try_opt;
 
 // self
 use super::prelude::*;
+use std::env::temp_dir;
 
 
 pub fn fill(
@@ -276,30 +277,34 @@ fn prepare_pattern<'a>(
     let mut layers = super::create_layers(img_size, opt);
     super::render_group(pattern_node, opt, &mut layers, &mut dt);
 
-//    let img = if !opacity.is_default() {
-//        // If `opacity` isn't `1` then we have to make image semitransparent.
-//        // The only way to do this is by making a new image and rendering
-//        // the pattern on it with transparency.
-//
-//        let mut img2 = try_create_image!(img_size, ());
-//        img2.fill(0, 0, 0, 0);
-//
-//        let mut p2 = qt::Painter::new(&mut img2);
-//        p2.set_opacity(opacity.value());
-//        p2.draw_image(0.0, 0.0, &img);
-//        p2.end();
-//
-//        img2
-//    } else {
-//        img
-//    };
+    let img = if !opacity.is_default() {
+        // If `opacity` isn't `1` then we have to make image semitransparent.
+        // The only way to do this is by making a new image and rendering
+        // the pattern on it with transparency.
+
+        let mut img2 = raqote::DrawTarget::new(img_size.width() as i32, img_size.height() as i32);
+
+        let src_img = raqote::Image {
+            width: dt.width() as i32,
+            height: dt.height() as i32,
+            data: dt.get_data(),
+        };
+        img2.draw_image_at(0.0, 0.0, &src_img, &raqote::DrawOptions {
+            blend_mode: raqote::BlendMode::Src,
+            alpha: opacity.value() as f32,
+        });
+
+        img2
+    } else {
+        dt
+    };
 
     let mut ts = usvg::Transform::default();
     ts.append(&pattern.transform);
     ts.translate(r.x(), r.y());
     ts.scale(1.0 / sx, 1.0 / sy);
 
-    Some((dt, ts))
+    Some((img, ts))
 }
 
 fn create_pattern_image(
@@ -312,9 +317,11 @@ fn create_pattern_image(
         data: dt.get_data(),
     };
 
+    let t: raqote::Transform = ts.to_native();
+
     raqote::Source::Image(
         img,
         raqote::ExtendMode::Repeat,
-        ts.to_native(),
+        t.inverse().unwrap(),
     )
 }
