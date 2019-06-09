@@ -86,7 +86,8 @@ pub fn draw_raster(
     };
 
 
-    let patt = raqote::Source::Image(img, raqote::ExtendMode::Repeat, ts.to_native());
+    let t: raqote::Transform = ts.to_native();
+    let patt = raqote::Source::Image(img, raqote::ExtendMode::Repeat, t.inverse().unwrap());
 
 
     dt.fill(&pb.finish(), &patt, &raqote::DrawOptions::default());
@@ -152,7 +153,8 @@ pub fn draw_svg(
         dt.push_clip(&pb.finish());
     }
 
-    dt.set_transform(&ts.to_native());
+    let ctm = dt.get_transform().pre_mul(&ts.to_native());
+    dt.set_transform(&ctm);
     super::render_to_canvas(&tree, &sub_opt, img_size, dt);
 
     if let Some(clip) = clip {
