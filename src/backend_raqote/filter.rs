@@ -441,7 +441,9 @@ impl Filter<raqote::DrawTarget> for RaqoteFilter {
             height: tile.height() as i32,
             data: tile.get_data(),
         };
-        let patt = raqote::Source::Image(img, raqote::ExtendMode::Repeat, brush_ts.to_native());
+        let t: raqote::Transform = brush_ts.to_native();
+        let t = t.inverse().unwrap();
+        let patt = raqote::Source::Image(img, raqote::ExtendMode::Repeat, t);
 
         let mut pb = raqote::PathBuilder::new();
         pb.rect(0.0, 0.0, region.width() as f32, region.height() as f32);
@@ -491,6 +493,7 @@ impl Filter<raqote::DrawTarget> for RaqoteFilter {
     ) -> Result<(), Error> {
         let input = input.into_color_space(ColorSpace::SRGB)?;
 
+        canvas.set_transform(&raqote::Transform::identity());
         canvas.clear(raqote::SolidSource {
             r: 0,
             g: 0,
